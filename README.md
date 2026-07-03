@@ -83,6 +83,35 @@ Result: ok
 
 `action invoke` runs asynchronously. Check the plugin log for the dry-run output.
 
+## test
+
+Send a real test notification to ntfy.
+
+```console
+$ herdr plugin action invoke test
+{"id":"cli:plugin","result":{"log":{"log_id":"plugin-log-114","status":"running"},"type":"plugin_action_invoked"}}
+
+$ herdr plugin log list --plugin horn553.herdr-ntfy --limit 1 | jq -r '.result.logs[-1].stdout'
+Herdr ntfy test
+
+curl: ok
+NTFY_URL: ok (https://ntfy.sh/your-...)
+NTFY_TITLE: Herdr
+NTFY_TOKEN: not set
+
+Sending title:
+🧪 verification・test (Herdr)
+
+Sending body:
+Herdr ntfy test: this notification was sent by the test action.
+Sent at: 2026-07-03T00:00:00Z
+
+ntfy response:
+{"id":"...","time":...,"expires":...,"event":"message","topic":"your-topic","message":"..."}
+
+Result: sent
+```
+
 ## Local Development
 
 ```sh

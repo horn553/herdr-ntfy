@@ -181,8 +181,81 @@ dry_run() {
   return 1
 }
 
+test_notification() {
+  load_env
+
+  ok=1
+  ntfy_url="${NTFY_URL:-}"
+  ntfy_title="$(clean_label "${NTFY_TITLE:-Herdr}" "Herdr")"
+
+  echo "Herdr ntfy test"
+  echo
+
+  if command_exists curl; then
+    echo "curl: ok"
+  else
+    echo "curl: missing"
+    ok=0
+  fi
+
+  if [ -n "$ntfy_url" ]; then
+    if is_http_url "$ntfy_url"; then
+      echo "NTFY_URL: ok ($(redact_url "$ntfy_url"))"
+    else
+      echo "NTFY_URL: invalid; expected http:// or https://"
+      ok=0
+    fi
+  else
+    echo "NTFY_URL: missing"
+    ok=0
+  fi
+
+  echo "NTFY_TITLE: $ntfy_title"
+
+  if [ -n "${NTFY_TOKEN:-}" ]; then
+    echo "NTFY_TOKEN: set"
+  else
+    echo "NTFY_TOKEN: not set"
+  fi
+
+  if [ "$ok" -ne 1 ]; then
+    echo
+    echo "Result: failed"
+    return 1
+  fi
+
+  sent_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  title="🧪 verification・test (${ntfy_title})"
+  body="$(printf 'Herdr ntfy test: this notification was sent by the test action.\nSent at: %s' "$sent_at")"
+
+  echo
+  echo "Sending title:"
+  echo "$title"
+  echo
+  echo "Sending body:"
+  echo "$body"
+  echo
+  echo "ntfy response:"
+
+  if response="$(send_ntfy "$title" "$body")"; then
+    printf '%s\n' "$response"
+    echo
+    echo "Result: sent"
+    return 0
+  fi
+
+  echo
+  echo "Result: failed"
+  return 1
+}
+
 if [ "${1:-}" = "--dry-run" ]; then
   dry_run
+  exit $?
+fi
+
+if [ "${1:-}" = "--test" ]; then
+  test_notification
   exit $?
 fi
 

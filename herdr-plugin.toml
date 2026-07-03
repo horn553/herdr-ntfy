@@ -1,0 +1,10 @@
+id = "horn553.herdr-ntfy"
+name = "Herdr ntfy"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Send ntfy notifications when Herdr agents finish or get blocked."
+platforms = ["linux", "macos"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["sh", "notify.sh"]

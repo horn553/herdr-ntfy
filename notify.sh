@@ -49,6 +49,143 @@ clean_label() {
   fi
 }
 
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+is_http_url() {
+  case "$1" in
+    http://* | https://*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_positive_integer() {
+  case "$1" in
+    '' | *[!0-9]*)
+      return 1
+      ;;
+    *)
+      [ "$1" -gt 0 ]
+      ;;
+  esac
+}
+
+redact_url() {
+  url="$1"
+
+  case "$url" in
+    http://*/* | https://*/*)
+      base="${url%/*}"
+      topic="${url##*/}"
+      prefix="$(printf '%s' "$topic" | cut -c 1-6)"
+      printf '%s/%s...' "$base" "$prefix"
+      ;;
+    *)
+      printf '%s' "$url"
+      ;;
+  esac
+}
+
+send_ntfy() {
+  title="$1"
+  body="$2"
+
+  if [ -n "${NTFY_TOKEN:-}" ]; then
+    printf '%s' "$body" | curl -fsS \
+      -H "Title: $title" \
+      -H "Content-Type: text/plain; charset=utf-8" \
+      -H "Authorization: Bearer $NTFY_TOKEN" \
+      --data-binary @- \
+      "$ntfy_url"
+  else
+    printf '%s' "$body" | curl -fsS \
+      -H "Title: $title" \
+      -H "Content-Type: text/plain; charset=utf-8" \
+      --data-binary @- \
+      "$ntfy_url"
+  fi
+}
+
+dry_run() {
+  load_env
+
+  ok=1
+  ntfy_url="${NTFY_URL:-}"
+  ntfy_title="$(clean_label "${NTFY_TITLE:-Herdr}" "Herdr")"
+  lines="${NTFY_LINES:-12}"
+
+  echo "Herdr ntfy dry-run"
+  echo
+
+  if command_exists curl; then
+    echo "curl: ok"
+  else
+    echo "curl: missing"
+    ok=0
+  fi
+
+  if command_exists jq; then
+    echo "jq: ok"
+  else
+    echo "jq: missing"
+    ok=0
+  fi
+
+  if [ -n "$ntfy_url" ]; then
+    if is_http_url "$ntfy_url"; then
+      echo "NTFY_URL: ok ($(redact_url "$ntfy_url"))"
+    else
+      echo "NTFY_URL: invalid; expected http:// or https://"
+      ok=0
+    fi
+  else
+    echo "NTFY_URL: missing"
+    ok=0
+  fi
+
+  echo "NTFY_TITLE: $ntfy_title"
+
+  if [ -n "${NTFY_TOKEN:-}" ]; then
+    echo "NTFY_TOKEN: set"
+  else
+    echo "NTFY_TOKEN: not set"
+  fi
+
+  if is_positive_integer "$lines"; then
+    echo "NTFY_LINES: $lines"
+  else
+    echo "NTFY_LINES: invalid; expected a positive integer"
+    ok=0
+  fi
+
+  echo
+  echo "Sample title:"
+  echo "✅ verification・dry-run (${ntfy_title})"
+  echo
+  echo "Sample body:"
+  echo "Herdr ntfy dry-run: no notification was sent."
+
+  if [ "$ok" -eq 1 ]; then
+    echo
+    echo "Result: ok"
+    return 0
+  fi
+
+  echo
+  echo "Result: failed"
+  return 1
+}
+
+if [ "${1:-}" = "--dry-run" ]; then
+  dry_run
+  exit $?
+fi
+
 load_env
 
 event_json="${HERDR_PLUGIN_EVENT_JSON:-}"
@@ -122,17 +259,4 @@ if [ -z "$body" ]; then
   )"
 fi
 
-if [ -n "${NTFY_TOKEN:-}" ]; then
-  printf '%s' "$body" | curl -fsS \
-    -H "Title: $title" \
-    -H "Content-Type: text/plain; charset=utf-8" \
-    -H "Authorization: Bearer $NTFY_TOKEN" \
-    --data-binary @- \
-    "$ntfy_url"
-else
-  printf '%s' "$body" | curl -fsS \
-    -H "Title: $title" \
-    -H "Content-Type: text/plain; charset=utf-8" \
-    --data-binary @- \
-    "$ntfy_url"
-fi
+send_ntfy "$title" "$body"

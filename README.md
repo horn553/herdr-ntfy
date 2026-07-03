@@ -56,11 +56,14 @@ Check configuration and print a sample notification. Nothing is sent to ntfy.
 
 ```sh
 herdr plugin action invoke dry-run
+herdr plugin log list --plugin horn553.herdr-ntfy --limit 5
 ```
 
 成功時の例:
 
-Example success output:
+`action invoke` は非同期で実行されます。dry-runの出力はplugin logで確認してください。
+
+Example success output from the plugin log:
 
 ```text
 Herdr ntfy dry-run

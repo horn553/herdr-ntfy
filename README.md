@@ -38,10 +38,12 @@ Set it in the plugin config directory .env file.
 ```sh
 herdr plugin install horn553/herdr-ntfy
 config_dir="$(herdr plugin config-dir horn553.herdr-ntfy)"
+touch "$config_dir/.env"
+chmod 600 "$config_dir/.env"
 $EDITOR "$config_dir/.env"
 ```
 
-Put this in `$config_dir/.env`.
+Create `$config_dir/.env`, restrict its permissions, and put this in it.
 
 ```sh
 NTFY_URL=https://ntfy.sh/your-topic

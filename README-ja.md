@@ -1,11 +1,11 @@
 # herdr-ntfy
 
-[日本語](README-ja.md)
+[English](README.md)
 
-A [Herdr](https://herdr.dev/) plugin that sends ntfy notifications when an agent reaches `done` or `blocked`.
-The feature set is intentionally small to keep dependencies simple.
+[Herdr](https://herdr.dev/)にて、agentが `done` または `blocked` になったとき、ntfyへ通知するプラグインです。
+機能を最低限に抑えることで、依存関係をシンプルにしています。
 
-## Notification Examples
+## 通知例
 
 ```text
 Title: ✅ herdr-ntfy・main (Herdr)
@@ -21,19 +21,19 @@ Blocked because NTFY_URL is not configured.
 Set it in the plugin config directory .env file.
 ```
 
-- `done` uses `✅`; `blocked` uses `🚫`.
-- The notification title is `<emoji> <workspace>・<tab> (<NTFY_TITLE>)`.
-- The notification body is recent output from the agent pane.
-- The plugin does not send a `Priority` header.
+- `done` は `✅`、`blocked` は `🚫` で通知します。
+- 通知タイトルは `<emoji> <workspace>・<tab> (<NTFY_TITLE>)` です。
+- 通知本文はagent paneの直近出力です。
+- `Priority` ヘッダーは送信しません。
 
-## Requirements
+## 必要なもの
 
 - Herdr >= 0.7.0
 - `sh`
 - `curl`
 - `jq`
 
-## Install
+## インストール
 
 ```sh
 herdr plugin install horn553/herdr-ntfy
@@ -41,7 +41,7 @@ config_dir="$(herdr plugin config-dir horn553.herdr-ntfy)"
 $EDITOR "$config_dir/.env"
 ```
 
-Put this in `$config_dir/.env`.
+`$config_dir/.env` に以下を設定してください。
 
 ```sh
 NTFY_URL=https://ntfy.sh/your-topic
@@ -50,11 +50,11 @@ NTFY_TOKEN=
 NTFY_LINES=12
 ```
 
-Set `NTFY_TOKEN` when using a protected topic.
+保護されたtopicを使う場合は `NTFY_TOKEN` を設定します。
 
 ## dry-run
 
-Check configuration and print a sample notification. Nothing is sent to ntfy.
+設定内容を確認し、サンプル通知内容を表示します。ntfyには送信しません。
 
 ```console
 $ herdr plugin action invoke dry-run
@@ -79,9 +79,9 @@ Herdr ntfy dry-run: no notification was sent.
 Result: ok
 ```
 
-`action invoke` runs asynchronously. Check the plugin log for the dry-run output.
+`action invoke` は非同期で実行されます。dry-runの出力はplugin logで確認してください。
 
-## Local Development
+## ローカル開発
 
 ```sh
 herdr plugin link .
@@ -89,11 +89,11 @@ config_dir="$(herdr plugin config-dir horn553.herdr-ntfy)"
 cp .env.example "$config_dir/.env"
 ```
 
-During local development, `./.env` is also read as a fallback.
+ローカル開発中は `./.env` もfallbackとして読みます。
 
 ## Marketplace
 
-Herdr's marketplace automatically indexes public GitHub repositories tagged with the `herdr-plugin` topic.
+Herdr marketplaceは `herdr-plugin` topicが付いたpublic GitHub repositoryを自動indexします。
 
 ## License
 

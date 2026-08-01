@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-[Herdr](https://herdr.dev/)にて、agentが `done` または `blocked` になったとき、ntfyへ通知するプラグインです。
+[Herdr](https://herdr.dev/)にて、agentが `done` または `blocked` になったとき、または `working` から直接 `idle` に変化したとき、ntfyへ通知するプラグインです。
 機能を最低限に抑えることで、依存関係をシンプルにしています。
 
 ## 通知例
@@ -21,7 +21,8 @@ Blocked because NTFY_URL is not configured.
 Set it in the plugin config directory .env file.
 ```
 
-- `done` は `✅`、`blocked` は `🚫` で通知します。
+- `done` と `working → idle` は `✅`、`blocked` は `🚫` で通知します。
+- `working → idle` の変化を判定するため、paneごとの直近statusをplugin config directoryに保存します。
 - 通知タイトルは `<emoji> <workspace>・<tab> (<NTFY_TITLE>)` です。
 - 通知本文はagent paneの直近出力です。
 - `Priority` ヘッダーは送信しません。
@@ -121,6 +122,12 @@ cp .env.example "$config_dir/.env"
 ```
 
 ローカル開発中は `./.env` もfallbackとして読みます。
+
+status変化のテストは以下で実行できます。
+
+```sh
+sh tests/notify_test.sh
+```
 
 ## Marketplace
 

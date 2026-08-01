@@ -1,8 +1,8 @@
 id = "horn553.herdr-ntfy"
 name = "Herdr ntfy"
-version = "0.1.2"
+version = "0.1.3"
 min_herdr_version = "0.7.0"
-description = "Send ntfy notifications when Herdr agents finish or get blocked."
+description = "Send ntfy notifications when Herdr agents finish, become idle after working, or get blocked."
 platforms = ["linux", "macos"]
 
 [[events]]

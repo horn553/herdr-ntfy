@@ -2,7 +2,7 @@
 
 [日本語](README-ja.md)
 
-A [Herdr](https://herdr.dev/) plugin that sends ntfy notifications when an agent reaches `done` or `blocked`.
+A [Herdr](https://herdr.dev/) plugin that sends ntfy notifications when an agent reaches `done` or `blocked`, or changes directly from `working` to `idle`.
 The feature set is intentionally small to keep dependencies simple.
 
 ## Notification Examples
@@ -21,7 +21,8 @@ Blocked because NTFY_URL is not configured.
 Set it in the plugin config directory .env file.
 ```
 
-- `done` uses `✅`; `blocked` uses `🚫`.
+- `done` and `working → idle` use `✅`; `blocked` uses `🚫`.
+- The plugin stores the latest status for each pane under the plugin config directory so it can recognize `working → idle` transitions.
 - The notification title is `<emoji> <workspace>・<tab> (<NTFY_TITLE>)`.
 - The notification body is recent output from the agent pane.
 - The plugin does not send a `Priority` header.
@@ -121,6 +122,12 @@ cp .env.example "$config_dir/.env"
 ```
 
 During local development, `./.env` is also read as a fallback.
+
+Run the transition tests with:
+
+```sh
+sh tests/notify_test.sh
+```
 
 ## Marketplace
 

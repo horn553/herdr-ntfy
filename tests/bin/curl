@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+printf '%s\n' "$*" >>"$NTFY_TEST_CALLS"
+cat >"$NTFY_TEST_BODY"
+printf '{"id":"test"}\n'

@@ -49,6 +49,55 @@ clean_label() {
   fi
 }
 
+status_state_file() {
+  pane_id="$1"
+
+  if [ -z "$pane_id" ]; then
+    return 0
+  fi
+
+  state_base="${HERDR_PLUGIN_CONFIG_DIR:-${HERDR_PLUGIN_ROOT:-.}}"
+  state_dir="$state_base/.state"
+  pane_key="$(printf '%s' "$pane_id" | cksum | sed 's/ /-/g')"
+
+  printf '%s/%s.status' "$state_dir" "$pane_key"
+}
+
+read_previous_status() {
+  state_file="$1"
+
+  if [ -n "$state_file" ] && [ -f "$state_file" ]; then
+    sed -n '1p' "$state_file"
+  fi
+}
+
+remember_status() {
+  state_file="$1"
+  status="$2"
+
+  if [ -z "$state_file" ]; then
+    return 0
+  fi
+
+  state_dir="${state_file%/*}"
+  state_tmp="${state_file}.$$"
+
+  if ! mkdir -p "$state_dir"; then
+    echo "failed to create status state directory: $state_dir" >&2
+    return 0
+  fi
+
+  if ! printf '%s\n' "$status" >"$state_tmp"; then
+    echo "failed to write status state: $state_tmp" >&2
+    return 0
+  fi
+
+  if ! mv "$state_tmp" "$state_file"; then
+    echo "failed to save status state: $state_file" >&2
+    rm -f "$state_tmp"
+  fi
+}
+
 command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
@@ -271,12 +320,27 @@ status="$(first_value \
 )"
 status="$(printf '%s' "$status" | tr '[:upper:]' '[:lower:]')"
 
+pane_id="$(first_value \
+  "$(json_value HERDR_PLUGIN_EVENT_JSON "$event_json" '.data.pane_id')" \
+  "$(json_value HERDR_PLUGIN_CONTEXT_JSON "$context_json" '.pane_id')" \
+  "${HERDR_PANE_ID:-}" \
+)"
+state_file="$(status_state_file "$pane_id")"
+previous_status="$(read_previous_status "$state_file")"
+remember_status "$state_file" "$status"
+
 case "$status" in
   done)
     emoji="✅"
     ;;
   blocked)
     emoji="🚫"
+    ;;
+  idle)
+    if [ "$previous_status" != "working" ]; then
+      exit 0
+    fi
+    emoji="✅"
     ;;
   *)
     exit 0
@@ -290,11 +354,6 @@ if [ -z "$ntfy_url" ]; then
 fi
 
 ntfy_title="$(clean_label "${NTFY_TITLE:-Herdr}" "Herdr")"
-pane_id="$(first_value \
-  "$(json_value HERDR_PLUGIN_EVENT_JSON "$event_json" '.data.pane_id')" \
-  "$(json_value HERDR_PLUGIN_CONTEXT_JSON "$context_json" '.pane_id')" \
-  "${HERDR_PANE_ID:-}" \
-)"
 workspace_name="$(first_value \
   "$(json_value HERDR_PLUGIN_CONTEXT_JSON "$context_json" '.workspace_label')" \
   "$(json_value HERDR_PLUGIN_CONTEXT_JSON "$context_json" '.workspace.name')" \

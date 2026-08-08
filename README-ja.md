@@ -25,6 +25,7 @@ Set it in the plugin config directory .env file.
 - `working → idle` の変化を判定するため、paneごとの直近statusをplugin config directoryに保存します。
 - 通知タイトルは `<emoji> <workspace>・<tab> (<NTFY_TITLE>)` です。
 - 通知本文はagent paneの直近出力です。
+- `COLLIE_URL` を設定すると、通知に [Collie](https://github.com/AltanS/collie) の対象paneを開く `Click` アクションが付きます（`<COLLIE_URL>/pane/<pane_id>`）。
 - `Priority` ヘッダーは送信しません。
 
 ## 必要なもの
@@ -51,9 +52,12 @@ NTFY_URL=https://ntfy.sh/your-topic
 NTFY_TITLE=Herdr
 NTFY_TOKEN=
 NTFY_LINES=12
+COLLIE_URL=
 ```
 
 保護されたtopicを使う場合は `NTFY_TOKEN` を設定します。
+
+`COLLIE_URL` に [Collie](https://github.com/AltanS/collie) インスタンスのベースURL（例: `https://your-tailnet-host.ts.net`、末尾スラッシュなし）を設定すると、通知が発生したpaneへ直接遷移するclickアクションが追加されます。未設定の場合はclickアクションを付けません。
 
 ## dry-run
 
@@ -72,12 +76,16 @@ NTFY_URL: ok (https://ntfy.sh/your-...)
 NTFY_TITLE: Herdr
 NTFY_TOKEN: not set
 NTFY_LINES: 12
+COLLIE_URL: ok (https://your-tailnet-host.ts.net)
 
 Sample title:
 ✅ verification・dry-run (Herdr)
 
 Sample body:
 Herdr ntfy dry-run: no notification was sent.
+
+Sample click URL:
+https://your-tailnet-host.ts.net/pane/wE%3Ap1
 
 Result: ok
 ```
@@ -99,6 +107,7 @@ curl: ok
 NTFY_URL: ok (https://ntfy.sh/your-...)
 NTFY_TITLE: Herdr
 NTFY_TOKEN: not set
+COLLIE_URL: not set (notifications will have no click action)
 
 Sending title:
 🧪 verification・test (Herdr)

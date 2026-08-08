@@ -35,6 +35,7 @@ run_event() {
   HERDR_PLUGIN_CONTEXT_JSON='{"workspace_label":"workspace","tab_label":"tab"}' \
   HERDR_PLUGIN_CONFIG_DIR="$config_dir" \
   NTFY_URL='https://ntfy.example/topic' \
+  COLLIE_URL="${COLLIE_URL:-}" \
   NTFY_TEST_CALLS="$calls" \
   NTFY_TEST_BODY="$body" \
   PATH="$root/tests/bin:$PATH" \
@@ -63,5 +64,18 @@ assert_call_count 2
 run_event blocked
 assert_call_count 3
 grep -q 'Title: 🚫 workspace・tab (Herdr)' "$calls"
+
+run_event working
+run_event done
+assert_call_count 4
+grep -q 'Click:' "$calls" && {
+  echo "expected no Click header without COLLIE_URL" >&2
+  exit 1
+}
+
+COLLIE_URL='https://collie.example.ts.net' run_event working
+COLLIE_URL='https://collie.example.ts.net' run_event done
+assert_call_count 5
+grep -q "Click: https://collie.example.ts.net/pane/pane-transition-test" "$calls"
 
 echo "notify tests: ok"

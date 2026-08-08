@@ -25,6 +25,7 @@ Set it in the plugin config directory .env file.
 - The plugin stores the latest status for each pane under the plugin config directory so it can recognize `working → idle` transitions.
 - The notification title is `<emoji> <workspace>・<tab> (<NTFY_TITLE>)`.
 - The notification body is recent output from the agent pane.
+- When `COLLIE_URL` is set, the notification includes a `Click` action that opens the source pane in [Collie](https://github.com/AltanS/collie) at `<COLLIE_URL>/pane/<pane_id>`.
 - The plugin does not send a `Priority` header.
 
 ## Requirements
@@ -51,9 +52,12 @@ NTFY_URL=https://ntfy.sh/your-topic
 NTFY_TITLE=Herdr
 NTFY_TOKEN=
 NTFY_LINES=12
+COLLIE_URL=
 ```
 
 Set `NTFY_TOKEN` when using a protected topic.
+
+Set `COLLIE_URL` to your [Collie](https://github.com/AltanS/collie) instance's base URL (for example `https://your-tailnet-host.ts.net`, no trailing slash) to add a click action that deep-links straight to the pane that triggered the notification. Leave it unset to omit the click action.
 
 ## dry-run
 
@@ -72,12 +76,16 @@ NTFY_URL: ok (https://ntfy.sh/your-...)
 NTFY_TITLE: Herdr
 NTFY_TOKEN: not set
 NTFY_LINES: 12
+COLLIE_URL: ok (https://your-tailnet-host.ts.net)
 
 Sample title:
 ✅ verification・dry-run (Herdr)
 
 Sample body:
 Herdr ntfy dry-run: no notification was sent.
+
+Sample click URL:
+https://your-tailnet-host.ts.net/pane/wE%3Ap1
 
 Result: ok
 ```
@@ -99,6 +107,7 @@ curl: ok
 NTFY_URL: ok (https://ntfy.sh/your-...)
 NTFY_TITLE: Herdr
 NTFY_TOKEN: not set
+COLLIE_URL: not set (notifications will have no click action)
 
 Sending title:
 🧪 verification・test (Herdr)

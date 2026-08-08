@@ -140,24 +140,42 @@ redact_url() {
   esac
 }
 
+url_encode() {
+  printf '%s' "$1" | jq -sRr @uri
+}
+
+collie_click_url() {
+  collie_url="$1"
+  pane_id="$2"
+
+  if [ -z "$collie_url" ] || [ -z "$pane_id" ]; then
+    return 0
+  fi
+
+  if ! is_http_url "$collie_url"; then
+    echo "invalid COLLIE_URL; expected http:// or https://" >&2
+    return 0
+  fi
+
+  printf '%s/pane/%s' "${collie_url%/}" "$(url_encode "$pane_id")"
+}
+
 send_ntfy() {
   title="$1"
   body="$2"
+  click_url="${3:-}"
+
+  set -- -H "Title: $title" -H "Content-Type: text/plain; charset=utf-8"
+
+  if [ -n "$click_url" ]; then
+    set -- "$@" -H "Click: $click_url"
+  fi
 
   if [ -n "${NTFY_TOKEN:-}" ]; then
-    printf '%s' "$body" | curl -fsS \
-      -H "Title: $title" \
-      -H "Content-Type: text/plain; charset=utf-8" \
-      -H "Authorization: Bearer $NTFY_TOKEN" \
-      --data-binary @- \
-      "$ntfy_url"
-  else
-    printf '%s' "$body" | curl -fsS \
-      -H "Title: $title" \
-      -H "Content-Type: text/plain; charset=utf-8" \
-      --data-binary @- \
-      "$ntfy_url"
+    set -- "$@" -H "Authorization: Bearer $NTFY_TOKEN"
   fi
+
+  printf '%s' "$body" | curl -fsS "$@" --data-binary @- "$ntfy_url"
 }
 
 dry_run() {
@@ -212,12 +230,30 @@ dry_run() {
     ok=0
   fi
 
+  collie_url="${COLLIE_URL:-}"
+  if [ -n "$collie_url" ]; then
+    if is_http_url "$collie_url"; then
+      echo "COLLIE_URL: ok ($collie_url)"
+    else
+      echo "COLLIE_URL: invalid; expected http:// or https://"
+      ok=0
+    fi
+  else
+    echo "COLLIE_URL: not set (notifications will have no click action)"
+  fi
+
   echo
   echo "Sample title:"
   echo "✅ verification・dry-run (${ntfy_title})"
   echo
   echo "Sample body:"
   echo "Herdr ntfy dry-run: no notification was sent."
+
+  if [ -n "$collie_url" ] && is_http_url "$collie_url"; then
+    echo
+    echo "Sample click URL:"
+    echo "$(collie_click_url "$collie_url" "wE:p1")"
+  fi
 
   if [ "$ok" -eq 1 ]; then
     echo
@@ -265,6 +301,18 @@ test_notification() {
     echo "NTFY_TOKEN: set"
   else
     echo "NTFY_TOKEN: not set"
+  fi
+
+  collie_url="${COLLIE_URL:-}"
+  if [ -n "$collie_url" ]; then
+    if is_http_url "$collie_url"; then
+      echo "COLLIE_URL: ok ($collie_url)"
+    else
+      echo "COLLIE_URL: invalid; expected http:// or https://"
+      ok=0
+    fi
+  else
+    echo "COLLIE_URL: not set (notifications will have no click action)"
   fi
 
   if [ "$ok" -ne 1 ]; then
@@ -352,6 +400,7 @@ if [ -z "$ntfy_url" ]; then
   echo "missing NTFY_URL" >&2
   exit 0
 fi
+click_url="$(collie_click_url "${COLLIE_URL:-}" "$pane_id")"
 
 ntfy_title="$(clean_label "${NTFY_TITLE:-Herdr}" "Herdr")"
 workspace_name="$(first_value \
@@ -391,4 +440,4 @@ if [ -z "$body" ]; then
   )"
 fi
 
-send_ntfy "$title" "$body"
+send_ntfy "$title" "$body" "$click_url"

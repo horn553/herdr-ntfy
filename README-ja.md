@@ -3,6 +3,7 @@
 [English](README.md)
 
 [Herdr](https://herdr.dev/)にて、agentが `done` または `blocked` になったとき、または `working` から直接 `idle` に変化したとき、ntfyへ通知するプラグインです。
+オプションの [Collie](https://github.com/AltanS/collie) 連携を設定すると、通知をタップして、通知元のHerdr paneをCollieのWeb画面で開けます。
 機能を最低限に抑えることで、依存関係をシンプルにしています。
 
 ## 通知例
@@ -25,6 +26,7 @@ Set it in the plugin config directory .env file.
 - `working → idle` の変化を判定するため、paneごとの直近statusをplugin config directoryに保存します。
 - 通知タイトルは `<emoji> <workspace>・<tab> (<NTFY_TITLE>)` です。
 - 通知本文はagent paneの直近出力です。
+- `COLLIE_URL` を設定すると、通知に [Collie](https://github.com/AltanS/collie) の対象paneを開く `Click` アクションが付きます（`<COLLIE_URL>/pane/<pane_id>`）。
 - `Priority` ヘッダーは送信しません。
 
 ## 必要なもの
@@ -51,9 +53,22 @@ NTFY_URL=https://ntfy.sh/your-topic
 NTFY_TITLE=Herdr
 NTFY_TOKEN=
 NTFY_LINES=12
+COLLIE_URL=
 ```
 
 保護されたtopicを使う場合は `NTFY_TOKEN` を設定します。
+
+### Collie連携（任意）
+
+このHerdrインスタンスで [Collie](https://github.com/AltanS/collie) を利用している場合は、`$config_dir/.env` にCollieのベースURLを設定してください（末尾スラッシュなし）。
+
+```sh
+COLLIE_URL=https://your-tailnet-host.ts.net
+```
+
+agentの通知に通知元paneへのリンクが追加されます。通知をタップすると、そのpaneをCollieで開けます。リンクを開く端末からCollieインスタンスへアクセスできる必要があります。
+
+`COLLIE_URL` が未設定または空の場合は、Collieへのリンクなしでntfy通知を受け取れます。以下のdry-runで生成されるURLを確認し、実際のagent通知でリンク先への遷移を確認してください。`test` アクションはpaneへのリンクを含まない汎用のテスト通知を送信します。
 
 ## dry-run
 
@@ -72,12 +87,16 @@ NTFY_URL: ok (https://ntfy.sh/your-...)
 NTFY_TITLE: Herdr
 NTFY_TOKEN: not set
 NTFY_LINES: 12
+COLLIE_URL: ok (https://your-tailnet-host.ts.net)
 
 Sample title:
 ✅ verification・dry-run (Herdr)
 
 Sample body:
 Herdr ntfy dry-run: no notification was sent.
+
+Sample click URL:
+https://your-tailnet-host.ts.net/pane/wE%3Ap1
 
 Result: ok
 ```
@@ -99,6 +118,7 @@ curl: ok
 NTFY_URL: ok (https://ntfy.sh/your-...)
 NTFY_TITLE: Herdr
 NTFY_TOKEN: not set
+COLLIE_URL: not set (notifications will have no click action)
 
 Sending title:
 🧪 verification・test (Herdr)

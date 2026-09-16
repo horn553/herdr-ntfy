@@ -3,6 +3,7 @@
 [English](README.md)
 
 [Herdr](https://herdr.dev/)にて、agentが `done` または `blocked` になったとき、または `working` から直接 `idle` に変化したとき、ntfyへ通知するプラグインです。
+オプションの [Collie](https://github.com/AltanS/collie) 連携を設定すると、通知をタップして、通知元のHerdr paneをCollieのWeb画面で開けます。
 機能を最低限に抑えることで、依存関係をシンプルにしています。
 
 ## 通知例
@@ -57,7 +58,17 @@ COLLIE_URL=
 
 保護されたtopicを使う場合は `NTFY_TOKEN` を設定します。
 
-`COLLIE_URL` に [Collie](https://github.com/AltanS/collie) インスタンスのベースURL（例: `https://your-tailnet-host.ts.net`、末尾スラッシュなし）を設定すると、通知が発生したpaneへ直接遷移するclickアクションが追加されます。未設定の場合はclickアクションを付けません。
+### Collie連携（任意）
+
+このHerdrインスタンスで [Collie](https://github.com/AltanS/collie) を利用している場合は、`$config_dir/.env` にCollieのベースURLを設定してください（末尾スラッシュなし）。
+
+```sh
+COLLIE_URL=https://your-tailnet-host.ts.net
+```
+
+agentの通知に通知元paneへのリンクが追加されます。通知をタップすると、そのpaneをCollieで開けます。リンクを開く端末からCollieインスタンスへアクセスできる必要があります。
+
+`COLLIE_URL` が未設定または空の場合は、Collieへのリンクなしでntfy通知を受け取れます。以下のdry-runで生成されるURLを確認し、実際のagent通知でリンク先への遷移を確認してください。`test` アクションはpaneへのリンクを含まない汎用のテスト通知を送信します。
 
 ## dry-run
 

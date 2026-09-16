@@ -3,6 +3,7 @@
 [日本語](README-ja.md)
 
 A [Herdr](https://herdr.dev/) plugin that sends ntfy notifications when an agent reaches `done` or `blocked`, or changes directly from `working` to `idle`.
+With optional [Collie](https://github.com/AltanS/collie) integration, tap a notification to open the Herdr pane that triggered it in Collie's web interface.
 The feature set is intentionally small to keep dependencies simple.
 
 ## Notification Examples
@@ -57,7 +58,17 @@ COLLIE_URL=
 
 Set `NTFY_TOKEN` when using a protected topic.
 
-Set `COLLIE_URL` to your [Collie](https://github.com/AltanS/collie) instance's base URL (for example `https://your-tailnet-host.ts.net`, no trailing slash) to add a click action that deep-links straight to the pane that triggered the notification. Leave it unset to omit the click action.
+### Optional Collie integration
+
+If you already use [Collie](https://github.com/AltanS/collie) with this Herdr instance, set its base URL in `$config_dir/.env` (no trailing slash):
+
+```sh
+COLLIE_URL=https://your-tailnet-host.ts.net
+```
+
+Agent notifications will include a link to the pane that triggered them. Tap a notification to open that pane in Collie. The device opening the link must be able to reach your Collie instance.
+
+Leave `COLLIE_URL` unset or empty to receive ntfy notifications without Collie links. The dry-run below previews the generated URL; verify click-through behavior with an actual agent notification. The `test` action sends a generic notification without a pane link.
 
 ## dry-run
 

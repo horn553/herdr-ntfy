@@ -32,11 +32,12 @@ Set it in the plugin config directory .env file.
 ## Requirements
 
 - Herdr >= 0.7.0
-- `sh`
-- `curl`
-- `jq`
+- Linux and macOS: `sh`, `curl`, `jq`
+- Windows: Windows PowerShell 5.1 or later, which ships with Windows
 
 ## Install
+
+### Linux and macOS
 
 ```sh
 herdr plugin install horn553/herdr-ntfy
@@ -46,7 +47,22 @@ chmod 600 "$config_dir/.env"
 $EDITOR "$config_dir/.env"
 ```
 
-Create `$config_dir/.env`, restrict its permissions, and put this in it.
+### Windows
+
+In PowerShell:
+
+```powershell
+herdr plugin install horn553/herdr-ntfy
+$config_dir = (herdr plugin config-dir horn553.herdr-ntfy)
+New-Item -ItemType Directory -Force $config_dir | Out-Null
+notepad (Join-Path $config_dir ".env")
+```
+
+On Windows the actions are named `dry-run-windows` and `test-windows`, because Herdr requires action ids to be unique within a plugin. On Windows the `.env` file is parsed by the plugin rather than run as a shell script, so quotes and `#` comments work but shell expansion does not.
+
+### Configuration
+
+Put this in `$config_dir/.env` (on Linux and macOS, also restrict its permissions).
 
 ```sh
 NTFY_URL=https://ntfy.sh/your-topic
@@ -148,6 +164,14 @@ Run the transition tests with:
 ```sh
 sh tests/notify_test.sh
 ```
+
+On Windows, run the tests with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests\notify_test.ps1
+```
+
+The Windows tests start a local fake ntfy server, so they need no network access.
 
 ## Marketplace
 

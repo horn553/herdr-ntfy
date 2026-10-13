@@ -1,20 +1,40 @@
 id = "horn553.herdr-ntfy"
 name = "Herdr ntfy"
-version = "0.2.0"
+version = "0.3.0"
 min_herdr_version = "0.7.0"
 description = "Send ntfy notifications when Herdr agents finish, become idle after working, or get blocked, with an optional Collie click-through link."
-platforms = ["linux", "macos"]
+platforms = ["linux", "macos", "windows"]
 
 [[events]]
 on = "pane.agent_status_changed"
+platforms = ["linux", "macos"]
 command = ["sh", "notify.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+platforms = ["windows"]
+command = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "notify.ps1"]
 
 [[actions]]
 id = "dry-run"
 title = "Dry Run"
+platforms = ["linux", "macos"]
 command = ["sh", "notify.sh", "--dry-run"]
+
+[[actions]]
+id = "dry-run-windows"
+title = "Dry Run"
+platforms = ["windows"]
+command = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "notify.ps1", "--dry-run"]
 
 [[actions]]
 id = "test"
 title = "Send Test Notification"
+platforms = ["linux", "macos"]
 command = ["sh", "notify.sh", "--test"]
+
+[[actions]]
+id = "test-windows"
+title = "Send Test Notification"
+platforms = ["windows"]
+command = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "notify.ps1", "--test"]
